@@ -39,78 +39,130 @@ def get_work_folder() -> str | None:
 def get_smeta_data(smeta_path) -> dict:
     # Чтение Excel-файла
     df = pd.read_excel(smeta_path, header=None)
-
-    # Находим начало таблицы с помощью поиска ключевого слова
-    start_index = 0
-    try: start_index = df.index[df.apply(lambda row: 'Перенос шкафа Энергомера' in ' '.join(map(str, row)), axis=1)].tolist()[0]
-    except: start_index = df.index[df.apply(lambda row: 'СМЕТА' in ' '.join(map(str, row)), axis=1)].tolist()[0] + 1
-
-    # Находим конец таблицы с помощью поиска ключевого слова
     
-    try: end_index = df.index[df.apply(lambda row: 'Итого работа и материалы'.lower() in ' '.join(map(str, row)).lower(), axis=1)].tolist()[0]
-    except: end_index = df.index[df.apply(lambda row: 'Итого материалы и работа'.lower() in ' '.join(map(str, row)).lower(), axis=1)].tolist()[0]
+    TABLES: list[dict[dict]] = []
+    table_started = False
+    table_index = -1
 
-    # Выбираем подтаблицу с интересующими данными
-    table_data = df.iloc[start_index:end_index+1, :]
+    for index, value in enumerate(df[0]):
 
-    # Преобразовываем в двумерный массив
-    result_data = table_data.values.tolist()
-
-    result_data_items = []
-    result_data_works = []
-    is_work = False
-    indexes = {
-        "№ п/п" : 0,
-        "наименование" : 0,
-        "ед. изм." : 0,
-        "кол-во" : 0
-    }
-    result_row = result_data[2]
-    for i in result_data:
-        if "ед. изм." in " ".join(list(map(str, i[:2]))):
-            result_row = i
-            break
-
-    for index, cell in enumerate(result_row):
-        if f'{cell}'.lower() in "№ п/п".lower():
-            indexes["№ п/п"] = index
-        if f'{cell}'.lower() in "наименование".lower():
-            indexes["наименование"] = index
-        if f'{cell}'.lower() in "ед. изм." .lower():
-            indexes["ед. изм." ] = index
-        if f'{cell}'.lower() in "кол-во".lower():
-            indexes["кол-во"] = index
-
-
-    for row in result_data[3:]:
-        if "работа".lower() in " ".join(list(map(str, row[:2]))).lower():
-            is_work = True
+        print(value)
+        
+        if not isinstance(value, int) and table_started:
+            table_started = False
+            continue 
+        
+        elif not isinstance(value, int):
             continue
 
-        if "Итого".lower() not in " ".join(list(map(str, row[:2]))).lower():
-            if is_work:
-                result_data_works.append({
-                    "N" : row[indexes["№ п/п"]],
-                    "D" : row[indexes["наименование"]],
-                    "M" : row[indexes["ед. изм."]],
-                    "C" : row[indexes["кол-во"]],
-                    "T" : "-",
-                })
+        elif value == 1:
+            name = ""
+            if "налог" in df[0][index-1].lower():
+                name = ""
+            elif "№" in df[0][index-1]:
+                name = df[0][index-2]
             else:
-                result_data_items.append({
-                    "N" : row[indexes["№ п/п"]],
-                    "D" : row[indexes["наименование"]],
-                    "M" : row[indexes["ед. изм."]],
-                    "C" : row[indexes["кол-во"]],
+                
+                name = df[0][index-1]
+
+            TABLES.append({
+                "name" : name,
+                "table" : []
+            })
+            table_index += 1
+            table_started = True
+            TABLES[table_index]["table"].append(
+                {
+                    "N" : df[0][index],
+                    "D" : df[2][index],
+                    "M" : df[3][index],
+                    "C" : df[4][index],
+                    "T" : "-",
+                }
+            )
+
+        elif isinstance(value, int) and table_started:
+            TABLES[table_index]["table"].append({
+                    "N" : df[0][index],
+                    "D" : df[2][index],
+                    "M" : df[3][index],
+                    "C" : df[4][index],
                     "T" : "-",
                 })
+    # print(json.dumps(TABLES, ensure_ascii=False, indent=4))
+    # quit()
+    
+    # # Находим начало таблицы с помощью поиска ключевого слова
+    # start_index = 0
+    # try: start_index = df.index[df.apply(lambda row: 'Перенос шкафа Энергомера' in ' '.join(map(str, row)), axis=1)].tolist()[0]
+    # except: start_index = df.index[df.apply(lambda row: 'СМЕТА' in ' '.join(map(str, row)), axis=1)].tolist()[0] + 1
 
-    result_dict = {
-        "SMETA_ITEMS_TABLE" : result_data_items,
-        "SMETA_WORKS_TABLE" : result_data_works
-    }
+    # # Находим конец таблицы с помощью поиска ключевого слова
+    
+    # try: end_index = df.index[df.apply(lambda row: 'Итого работа и материалы'.lower() in ' '.join(map(str, row)).lower(), axis=1)].tolist()[0]
+    # except: end_index = df.index[df.apply(lambda row: 'Итого материалы и работа'.lower() in ' '.join(map(str, row)).lower(), axis=1)].tolist()[0]
 
-    return result_dict
+    # # Выбираем подтаблицу с интересующими данными
+    # table_data = df.iloc[start_index:end_index+1, :]
+
+    # # Преобразовываем в двумерный массив
+    # result_data = table_data.values.tolist()
+
+    # result_data_items = []
+    # result_data_works = []
+    # is_work = False
+    # indexes = {
+    #     "№ п/п" : 0,
+    #     "наименование" : 0,
+    #     "ед. изм." : 0,
+    #     "кол-во" : 0
+    # }
+    # result_row = result_data[2]
+    # for i in result_data:
+    #     if "ед. изм." in " ".join(list(map(str, i[:2]))):
+    #         result_row = i
+    #         break
+
+    # for index, cell in enumerate(result_row):
+    #     if f'{cell}'.lower() in "№ п/п".lower():
+    #         indexes["№ п/п"] = index
+    #     if f'{cell}'.lower() in "наименование".lower():
+    #         indexes["наименование"] = index
+    #     if f'{cell}'.lower() in "ед. изм." .lower():
+    #         indexes["ед. изм." ] = index
+    #     if f'{cell}'.lower() in "кол-во".lower():
+    #         indexes["кол-во"] = index
+
+
+    # for row in result_data[3:]:
+    #     if "работа".lower() in " ".join(list(map(str, row[:2]))).lower():
+    #         is_work = True
+    #         continue
+
+    #     if "Итого".lower() not in " ".join(list(map(str, row[:2]))).lower():
+    #         if is_work:
+    #             result_data_works.append({
+    #                 "N" : row[indexes["№ п/п"]],
+    #                 "D" : row[indexes["наименование"]],
+    #                 "M" : row[indexes["ед. изм."]],
+    #                 "C" : row[indexes["кол-во"]],
+    #                 "T" : "-",
+    #             })
+    #         else:
+    #             result_data_items.append({
+    #                 "N" : row[indexes["№ п/п"]],
+    #                 "D" : row[indexes["наименование"]],
+    #                 "M" : row[indexes["ед. изм."]],
+    #                 "C" : row[indexes["кол-во"]],
+    #                 "T" : "-",
+    #             })
+
+    # result_dict = {
+    #     "SMETA_ITEMS_TABLE" : result_data_items,
+    #     "SMETA_WORKS_TABLE" : result_data_works
+    # }
+
+    return TABLES
 
 
 
@@ -471,6 +523,7 @@ def get__there_should_be_an_smeta_if_there_is_this_text():
     if there_should_be_an_smeta_if_there_is_this_text != "":
         return there_should_be_an_smeta_if_there_is_this_text
     else:
+
         # send_message("Укажите путь к рабочей папке")
         return ""
 
@@ -588,10 +641,10 @@ def create_files(folder, data, tmpl_type, have_smeta=False):
         template_ATP = DocxTemplate("templates/FTTB ШАБЛОН АТП.docx")    
         
         if smeta_path != "":
-            smeta_data = get_smeta_data(smeta_path)
-            print(smeta_data)
-            data["SMETA_ITEMS_TABLE"] = smeta_data["SMETA_ITEMS_TABLE"]
-            data["SMETA_WORKS_TABLE"] = smeta_data["SMETA_WORKS_TABLE"]
+            data["SMETA_TABLES"] = get_smeta_data(smeta_path)
+            # print(smeta_data)
+            # data["SMETA_TABLES"] = smeta_data["SMETA_ITEMS_TABLE"]
+            # data["SMETA_WORKS_TABLE"] = smeta_data["SMETA_WORKS_TABLE"]
             # combine_docx(output_path, smeta_path, output_path, is_second=False, is_atp=False)
         # ADD_END("atp", output_path, output_path, data)
 
