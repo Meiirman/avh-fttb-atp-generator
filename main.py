@@ -8,5 +8,7 @@ def main(*args, **kwargs):
     run_project(*args, **kwargs)
 
 
+
 if __name__ == "__main__":
+    # TEST
     main()
