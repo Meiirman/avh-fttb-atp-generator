@@ -335,7 +335,7 @@ def replace_p_tags_with_br(html_content):
 def get_types_of_works(): 
     with open('config/типы работ.json', 'r', encoding="utf-8") as file:
         return json.load(file)
-    
+
     
 def get_TYPE_OF_WORK(file_name):
     return ""
@@ -622,8 +622,8 @@ def ADD_END(typez, input_path, output_path, data):
     combine_docx(input_path, "templates/ШАБЛОН WITH END.docx", output_path, True, typez == "АТП" )
 
 
-def create_files(folder, data, tmpl_type, have_smeta=False):
-
+def create_files(folder, data, tmpl_type, have_smeta=False, selected_date=None):
+    data['R_T'] = selected_date.strftime("%d.%m.%Y")
     if " - " in data['BS_NAME']:
         BS_ADDRESSx=data['BS_ADDRESS']
         BS_ADDRESS = data['BS_ADDRESS'].split(" - ")
