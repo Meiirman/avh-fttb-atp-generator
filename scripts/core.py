@@ -57,6 +57,9 @@ def run_project(*args, **kwargs) -> None:
     button_generate1 = tk.Button(root, text="Генерировать FTTB АТП", command=lambda: generateX("atp", project, entry_date.get_date()))
     label_x1 = tk.Label(root, text="")
 
+    button_generate2 = tk.Button(root, text="Генерировать FTTB АТП РВР", command=lambda: generateX("atp", project, entry_date.get_date(), rvr=True))
+    label_x2 = tk.Label(root, text="")
+
     folder4_var = tk.StringVar(value=get_work_folder())
     label_folder4 = tk.Label(root, text="Сменить рабочую папку:")
     entry_folder4 = tk.Entry(root, textvariable=folder4_var, state="normal", width=70)
@@ -67,6 +70,8 @@ def run_project(*args, **kwargs) -> None:
 
     button_generate1.grid(row=1, column=0, columnspan=3, pady=10)
     label_x1.grid(row=2, column=0, padx=10, pady=5, sticky="w")
+    button_generate2.grid(row=3, column=0, columnspan=3, pady=10)
+    label_x2.grid(row=4, column=0, padx=10, pady=5, sticky="w")
     label_folder4.grid(row=15, column=0, padx=10, pady=5, sticky="w")
     entry_folder4.grid(row=15, column=1, padx=10, pady=5, sticky="w")
     button_folder4.grid(row=15, column=2, padx=10, pady=5)
@@ -81,8 +86,8 @@ def run_project(*args, **kwargs) -> None:
 def send_report(text=None, process=None, responsible=None):
     requests.post(f"https://script.google.com/macros/s/AKfycbzDwjE6Pu1a7otho2EHwbI-4yNoEmLijTfwWfI3toWpDpJ6rc-O1pKljV6XMLJmQIyJ/exec?time={datetime.datetime.now().strftime('%d.%m.%Y %H:%M:%S')}&process={process}&responsible={responsible}&text={text}")
 
-def generateX(tmpl_type: str, project, selected_date):
-    try: generate(tmpl_type, project, selected_date)
+def generateX(tmpl_type: str, project, selected_date, rvr=False):
+    try: generate(tmpl_type, project, selected_date, rvr)
     except:
         if "PermissionError" in traceback.format_exc(): 
             text = traceback.format_exc()
@@ -98,11 +103,40 @@ def generateX(tmpl_type: str, project, selected_date):
                 send_message("Неизвестная ошибка в скрипте\nОписание ошибки: " + traceback.format_exc())
         else:
             send_message("Неизвестная ошибка в скрипте\nОписание ошибки: " + traceback.format_exc())
-def generate(tmpl_type: str, project, selected_date):
+def generate(tmpl_type: str, project, selected_date, rvr):
     if project.show_warning:
         send_message("В ходе работы скрипта не не открывайте/изменяйте/удаляйте файлы внутри папки так как это может привести к ошибкам\nПожалуйста дождитесь уведомления от скрипта")
-    orders: dict = get_orders(project)
-   
+    if rvr:
+        get_rvr_orders()
+        orders=[{
+                "BS_NUMBER" : "", 
+                "BS_NAME" : "", 
+                "BS_ADDRESS" : "", 
+                "ORDER_REGION" : "", 
+                "ORDER_MANAGER" : "", 
+                "ORDER_NUMBER" : "", 
+                "ORDER_DATE" : "", 
+                "TOTAL_SUMM" : "", 
+                "TOTAL_NDS" : "", 
+                "TOTAL_SUMM_NDS" : "", 
+                "TOTAL_SUMM_NDS_WORD" : "", 
+                "ORDER_DOGOVOR_NUMBER" : "", 
+                "ORDER_DOGOVOR_DATE" : "", 
+                "TABLE" : [
+                    {
+                        "N" : "1",
+                        "D" : "Cтроительно-монтажные работы",
+                        "M" : "1 комплекс работ",
+                        "C" : "1",
+                    }
+                ],
+                "ORDER_MANAGER_POSITION" : "" ,
+                "TYPE_OF_WORK" : "", 
+                "IS_RVR" : True
+            }]
+    else:
+        orders: dict = get_orders(project)
+    
     if orders['status'] == -1:
         return
     

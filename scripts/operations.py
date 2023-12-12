@@ -8,6 +8,7 @@ import pandas as pd
 import tkinter as tk
 from tkinter import messagebox, filedialog
 from bs4 import BeautifulSoup
+import openpyxl
 from num2words import num2words
 from docxtpl import DocxTemplate
 from docx import Document
@@ -182,6 +183,50 @@ def browse_folder(entry_var : tk.StringVar) -> None:
     folder_selected = filedialog.askdirectory()
     entry_var.set(folder_selected)
     set_work_folder(folder_selected)
+
+
+
+def get_rvr_orders(project: Project) -> dict:
+    folder = get_work_folder()
+    if folder == None:
+        return {"status" : -1}
+    
+    # получить все файлы в папке
+    files = os.listdir(folder)
+    excel_file_path = None
+    if files:
+        for file in files:
+            if file.endswith(('.xlsx')):
+                excel_file_path = folder + "/" + file
+
+        workbook = openpyxl.load_workbook(excel_file_path)
+
+        # Получаем активный лист (первый лист)
+        sheet = workbook.active
+
+        # Получаем значение из ячейки A1            
+
+        # Получаем значение из ячейки A3
+        value_A3 = sheet['A3'].value
+
+        if value_A3:
+            value_A3 = value_A3.split("в ")
+        
+
+        # Выводим значение
+        print(f"Значение в ячейке A3: {value_A3}")
+
+        # Закрываем файл Excel
+        workbook.close()
+    
+
+    else:
+        send_message("В рабочей папке нет файлов")
+        return {"status" : -1}
+    pass
+
+
+
 
 
 def get_orders(project: Project) -> dict:
@@ -414,7 +459,7 @@ def get_BS_NAME(text):
 
     
 def get_BS_ADDRESS(text):
-    return ",".join(text.split("ВЕДОМОСТЬ исполнения работ")[1].split(",")[1:])
+    return "г." + f'{text.split("ВЕДОМОСТЬ исполнения работ")[1].split("г.")[1]}'
 
     
 def get_ORDER_REGION(soup):
