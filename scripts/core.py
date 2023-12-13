@@ -39,7 +39,7 @@ from tkcalendar import DateEntry
 from itertools import cycle
 
 from scripts.models import Project
-from scripts.operations import browse_folder, create_files, get_work_folder, send_message, set_work_folder, get_orders, get_have_smeta
+from scripts.operations import browse_folder, get_rvr_orders, create_files, get_work_folder, send_message, set_work_folder, get_orders, get_have_smeta
 
 
 def run_project(*args, **kwargs) -> None:
@@ -107,45 +107,20 @@ def generate(tmpl_type: str, project, selected_date, rvr):
     if project.show_warning:
         send_message("В ходе работы скрипта не не открывайте/изменяйте/удаляйте файлы внутри папки так как это может привести к ошибкам\nПожалуйста дождитесь уведомления от скрипта")
     if rvr:
-        get_rvr_orders()
-        orders=[{
-                "BS_NUMBER" : "", 
-                "BS_NAME" : "", 
-                "BS_ADDRESS" : "", 
-                "ORDER_REGION" : "", 
-                "ORDER_MANAGER" : "", 
-                "ORDER_NUMBER" : "", 
-                "ORDER_DATE" : "", 
-                "TOTAL_SUMM" : "", 
-                "TOTAL_NDS" : "", 
-                "TOTAL_SUMM_NDS" : "", 
-                "TOTAL_SUMM_NDS_WORD" : "", 
-                "ORDER_DOGOVOR_NUMBER" : "", 
-                "ORDER_DOGOVOR_DATE" : "", 
-                "TABLE" : [
-                    {
-                        "N" : "1",
-                        "D" : "Cтроительно-монтажные работы",
-                        "M" : "1 комплекс работ",
-                        "C" : "1",
-                    }
-                ],
-                "ORDER_MANAGER_POSITION" : "" ,
-                "TYPE_OF_WORK" : "", 
-                "IS_RVR" : True
-            }]
+        orders = get_rvr_orders(project)
     else:
         orders: dict = get_orders(project)
     
     if orders['status'] == -1:
-        return
+        return ""
     
     # print(orders['result'])
     
     for order in orders['result']:
-        
-
-        have_smeta: bool = get_have_smeta(order) # type: ignore
+        if order['IS_RVR']:
+            have_smeta: bool = True
+        else:
+            have_smeta: bool = get_have_smeta(order) # type: ignore
         
         if "atp" == tmpl_type: # type: ignore
             create_files(data=order, folder=get_work_folder(), tmpl_type=tmpl_type, have_smeta=have_smeta, selected_date=selected_date)    
@@ -155,7 +130,7 @@ def generate(tmpl_type: str, project, selected_date, rvr):
         
         elif "atp avr" == tmpl_type: # type: ignore
             create_files(data=order, folder=get_work_folder(), tmpl_type=tmpl_type, have_smeta=have_smeta, selected_date=selected_date)    
-        
+    
     send_report(text="FTTB АТП Генератор", process="FTTB АТП Генератор", responsible=os.getlogin())
     send_message("Готово!")
 

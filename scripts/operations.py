@@ -37,7 +37,7 @@ def get_work_folder() -> str | None:
         return None
 
 
-def get_smeta_data(smeta_path) -> dict:
+def get_smeta_data(smeta_path, rvr=False) -> dict:
     # Чтение Excel-файла
     df = pd.read_excel(smeta_path, header=None)
     
@@ -72,24 +72,48 @@ def get_smeta_data(smeta_path) -> dict:
             })
             table_index += 1
             table_started = True
-            TABLES[table_index]["table"].append(
-                {
-                    "N" : df[0][index],
-                    "D" : df[2][index],
-                    "M" : df[3][index],
-                    "C" : df[4][index],
-                    "T" : "-",
-                }
-            )
+            if rvr:
+                TABLES[table_index]["table"].append(
+                    {
+                        "N" : df[0][index],
+                        "D" : df[1][index],
+                        "M" : df[2][index],
+                        "C" : df[3][index],
+                        "T" : "-",
+                    }
+                )
+            else:
+                TABLES[table_index]["table"].append(
+                    {
+                        "N" : df[0][index],
+                        "D" : df[2][index],
+                        "M" : df[3][index],
+                        "C" : df[4][index],
+                        "T" : "-",
+                    }
+                )
 
         elif isinstance(value, int) and table_started:
-            TABLES[table_index]["table"].append({
-                    "N" : df[0][index],
-                    "D" : df[2][index],
-                    "M" : df[3][index],
-                    "C" : df[4][index],
-                    "T" : "-",
-                })
+            if rvr:
+                TABLES[table_index]["table"].append(
+                    {
+                        "N" : df[0][index],
+                        "D" : df[1][index],
+                        "M" : df[2][index],
+                        "C" : df[3][index],
+                        "T" : "-",
+                    }
+                )
+            else:
+                TABLES[table_index]["table"].append(
+                    {
+                        "N" : df[0][index],
+                        "D" : df[2][index],
+                        "M" : df[3][index],
+                        "C" : df[4][index],
+                        "T" : "-",
+                    }
+                )
     # print(json.dumps(TABLES, ensure_ascii=False, indent=4))
     # quit()
     
@@ -162,6 +186,9 @@ def get_smeta_data(smeta_path) -> dict:
     #     "SMETA_ITEMS_TABLE" : result_data_items,
     #     "SMETA_WORKS_TABLE" : result_data_works
     # }
+    # if rvr:
+    #     try: TABLES = TABLES[1:]
+    #     except: pass
 
     return TABLES
 
@@ -174,6 +201,7 @@ def set_work_folder(folder_path):
 
 
 def send_message(message):
+    print(message)
     root = tk.Tk()
     root.withdraw()
     messagebox.showinfo("Формировать отчет", message)
@@ -207,18 +235,70 @@ def get_rvr_orders(project: Project) -> dict:
         # Получаем значение из ячейки A1            
 
         # Получаем значение из ячейки A3
-        value_A3 = sheet['A3'].value
-
-        if value_A3:
-            value_A3 = value_A3.split("в ")
+        value_A3 = str(sheet['A3'].value)
         
 
         # Выводим значение
         print(f"Значение в ячейке A3: {value_A3}")
 
+
         # Закрываем файл Excel
         workbook.close()
-    
+
+        print(f"value_A3 = {value_A3.split(' в ')}")
+        WORK_NAME = ""
+        try: WORK_NAME = str(value_A3).split(" в ")[0]
+        except: pass
+
+        BS_ADDRESS = ""
+        try: BS_ADDRESS = str(value_A3).split(" в ")[1]
+        except: pass
+
+
+        BS_NUMBER = ""
+        BS_NAME = ""
+        ORDER_REGION = ""
+        ORDER_MANAGER = ""
+        ORDER_NUMBER = ""
+        ORDER_DATE = ""
+        TOTAL_SUMM = ""
+        TOTAL_NDS = ""
+        TOTAL_SUMM_NDS = ""
+        TOTAL_SUMM_NDS_WORD = ""
+        ORDER_DOGOVOR_NUMBER = ""
+        ORDER_DOGOVOR_DATE = ""
+
+        orders = {
+            "status" : 0,
+            "result" : [{
+                "WORK_NAME" : "Ремонтно-восстановительные работы (РВР)", 
+                "BS_NUMBER" : BS_NUMBER, 
+                "BS_NAME" : "Ремонтно-восстановительные работы (РВР)", 
+                "BS_ADDRESS" : BS_ADDRESS, 
+                "ORDER_REGION" : ORDER_REGION, 
+                "ORDER_MANAGER" : ORDER_MANAGER, 
+                "ORDER_NUMBER" : ORDER_NUMBER, 
+                "ORDER_DATE" : ORDER_DATE, 
+                "TOTAL_SUMM" : TOTAL_SUMM, 
+                "TOTAL_NDS" : TOTAL_NDS, 
+                "TOTAL_SUMM_NDS" : TOTAL_SUMM_NDS, 
+                "TOTAL_SUMM_NDS_WORD" : TOTAL_SUMM_NDS_WORD, 
+                "ORDER_DOGOVOR_NUMBER" : ORDER_DOGOVOR_NUMBER, 
+                "ORDER_DOGOVOR_DATE" : ORDER_DOGOVOR_DATE, 
+                "TABLE" : [
+                    {
+                        "N" : "1",
+                        "D" : "Cтроительно-монтажные работы",
+                        "M" : "1 комплекс работ",
+                        "C" : "1",
+                    }
+                ],
+                "ORDER_MANAGER_POSITION" : "" ,
+                "TYPE_OF_WORK" : "", 
+                "IS_RVR" : True
+            }]}
+        
+        return orders
 
     else:
         send_message("В рабочей папке нет файлов")
@@ -624,7 +704,7 @@ def combine_docx(file1, file2, output_file, is_second=False, is_atp=False):
     doc1.save(file1[:-5] + ".docx" )
 
 
-def get_smeta(order):
+def get_smeta(order, rvr=False):    
      # открыть папку
     folder = get_work_folder()
     if folder == None:
@@ -646,7 +726,9 @@ def get_smeta(order):
         send_message("В рабочей папке нет файлов")
         return {"status" : -1}
     
-
+    if rvr:
+        return xlsx_files[0]
+    
     for file in xlsx_files:
         if order['BS_ADDRESS'][2:10] in file:
             return file
@@ -669,6 +751,8 @@ def ADD_END(typez, input_path, output_path, data):
 
 def create_files(folder, data, tmpl_type, have_smeta=False, selected_date=None):
     data['R_T'] = selected_date.strftime("%d.%m.%Y")
+
+
     if " - " in data['BS_NAME']:
         BS_ADDRESSx=data['BS_ADDRESS']
         BS_ADDRESS = data['BS_ADDRESS'].split(" - ")
@@ -677,16 +761,19 @@ def create_files(folder, data, tmpl_type, have_smeta=False, selected_date=None):
         except: data['BS_ADDRESS'] = BS_ADDRESSx
         
     smeta_path = ""
-    if have_smeta:
+    
+    if data["IS_RVR"]:
+        smeta_path = get_smeta(data, rvr=True)
+    elif have_smeta:
         smeta_path = get_smeta(data)
 
     if "atp" in tmpl_type:
         data["WORK_NAME"] = data['BS_NAME']
         data["have_smeta"] = have_smeta
         template_ATP = DocxTemplate("templates/FTTB ШАБЛОН АТП.docx")    
-        
+        rvr = True if data['IS_RVR'] else False
         if smeta_path != "":
-            data["SMETA_TABLES"] = get_smeta_data(smeta_path)
+            data["SMETA_TABLES"] = get_smeta_data(smeta_path, rvr)
             # print(smeta_data)
             # data["SMETA_TABLES"] = smeta_data["SMETA_ITEMS_TABLE"]
             # data["SMETA_WORKS_TABLE"] = smeta_data["SMETA_WORKS_TABLE"]
