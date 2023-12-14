@@ -103,6 +103,8 @@ def generateX(tmpl_type: str, project, selected_date, rvr=False):
                 send_message("Неизвестная ошибка в скрипте\nОписание ошибки: " + traceback.format_exc())
         else:
             send_message("Неизвестная ошибка в скрипте\nОписание ошибки: " + traceback.format_exc())
+
+
 def generate(tmpl_type: str, project, selected_date, rvr):
     if project.show_warning:
         send_message("В ходе работы скрипта не не открывайте/изменяйте/удаляйте файлы внутри папки так как это может привести к ошибкам\nПожалуйста дождитесь уведомления от скрипта")
@@ -110,6 +112,9 @@ def generate(tmpl_type: str, project, selected_date, rvr):
         orders = get_rvr_orders(project)
     else:
         orders: dict = get_orders(project)
+        for i, order in enumerate(orders['result']):
+            print(order)
+            orders['result'][i]['IS_RVR'] = False
     
     if orders['status'] == -1:
         return ""
