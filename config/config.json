@@ -1,6 +1,6 @@
 {
     "title" : "АТП АВР для письма заказчику",
     "there_should_be_an_smeta_if_there_is_this_text" : "11.126",
-    "show_errors_window" : false,
-    "show_warning" : false
+    "show_errors_window" : true,
+    "show_warning" : true
 }

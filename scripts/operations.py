@@ -370,9 +370,9 @@ def get_orders(project: Project) -> dict:
             multi_BS_ADDRESS.append(get_BS_ADDRESS(text)) # DONE
 
         
-        multi_ORDER_REGION = [regions[iii]["reg_name"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
-        multi_ORDER_MANAGER = [regions[iii]["reg_resp_name"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
-        multi_ORDER_MANAGER_POSITION = [regions[iii]["reg_resp_position"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
+        # multi_ORDER_REGION = [regions[iii]["reg_name"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
+        # multi_ORDER_MANAGER = [regions[iii]["reg_resp_name"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
+        # multi_ORDER_MANAGER_POSITION = [regions[iii]["reg_resp_position"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
 
         for i in range(1, len(main_tables), 2):
             multi_TOTAL_SUMM.append(get_TOTAL_SUMM(main_tables[i])) # DONE
@@ -393,8 +393,8 @@ def get_orders(project: Project) -> dict:
                 "BS_NUMBER" : multi_BS_NUMBER[i], 
                 "BS_NAME" : multi_BS_NAME[i], 
                 "BS_ADDRESS" : multi_BS_ADDRESS[i], 
-                "ORDER_REGION" : multi_ORDER_REGION[i], 
-                "ORDER_MANAGER" : multi_ORDER_MANAGER[i], 
+                # "ORDER_REGION" : multi_ORDER_REGION[i], 
+                # "ORDER_MANAGER" : multi_ORDER_MANAGER[i], 
                 "ORDER_NUMBER" : multi_ORDER_NUMBER[i], 
                 "ORDER_DATE" : multi_ORDER_DATE[i], 
                 "TOTAL_SUMM" : multi_TOTAL_SUMM[i], 
@@ -404,7 +404,7 @@ def get_orders(project: Project) -> dict:
                 "ORDER_DOGOVOR_NUMBER" : const_ORDER_DOGOVOR_NUMBER, 
                 "ORDER_DOGOVOR_DATE" : const_ORDER_DOGOVOR_DATE, 
                 "TABLE" : multi_TABLE[i], 
-                "ORDER_MANAGER_POSITION" : multi_ORDER_MANAGER_POSITION[i], 
+                # "ORDER_MANAGER_POSITION" : multi_ORDER_MANAGER_POSITION[i], 
                 "TYPE_OF_WORK" : get_TYPE_OF_WORK(f'{html_file}')
             }
             result.append(data)
@@ -486,7 +486,7 @@ def get_FILE_NAME(ATP_OR_AVR, BS_NAME, TYPE_OF_WORK):
     }
 
     # return variants[ATP_OR_AVR][TYPE_OF_WORK]
-    return "FTTB АТП " + BS_NAME
+    return "АТП " + BS_NAME
 
 
 def get_regions(): 
@@ -781,7 +781,7 @@ def create_files(folder, data, tmpl_type, have_smeta=False, selected_date=None):
         # ADD_END("atp", output_path, output_path, data)
 
         template_ATP.render(data)
-        file_name__ATP = get_FILE_NAME("АТП", data['BS_NAME'], data['TYPE_OF_WORK'])
+        file_name__ATP = get_FILE_NAME("АТП", data['BS_ADDRESS'], data['TYPE_OF_WORK'])
         output_path = folder + "/" + file_name__ATP + ".docx"
         template_ATP.save(output_path)
     

@@ -109,3 +109,30 @@ IndexError: list index out of range
                           ~~~~~~~^^^^^
 KeyError: ''
 
+2023-12-14 16:41:36: Traceback (most recent call last):
+  File "C:\Users\22186\Desktop\WORK_FOLDER\1. DEV\avh-fttb-atp-generator\scripts\operations.py", line 373, in get_orders
+    multi_ORDER_REGION = [regions[iii]["reg_name"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\22186\Desktop\WORK_FOLDER\1. DEV\avh-fttb-atp-generator\scripts\operations.py", line 373, in <listcomp>
+    multi_ORDER_REGION = [regions[iii]["reg_name"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
+                          ~~~~~~~^^^^^
+KeyError: ''
+
+2023-12-14 16:47:44: Traceback (most recent call last):
+  File "C:\Users\22186\Desktop\WORK_FOLDER\1. DEV\avh-fttb-atp-generator\scripts\operations.py", line 373, in get_orders
+    multi_ORDER_REGION = [regions[iii]["reg_name"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\22186\Desktop\WORK_FOLDER\1. DEV\avh-fttb-atp-generator\scripts\operations.py", line 373, in <listcomp>
+    multi_ORDER_REGION = [regions[iii]["reg_name"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
+                          ~~~~~~~^^^^^
+KeyError: ''
+
+2023-12-14 16:48:43: Traceback (most recent call last):
+  File "C:\Users\22186\Desktop\WORK_FOLDER\1. DEV\avh-fttb-atp-generator\scripts\operations.py", line 374, in get_orders
+    multi_ORDER_MANAGER = [regions[iii]["reg_resp_name"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\22186\Desktop\WORK_FOLDER\1. DEV\avh-fttb-atp-generator\scripts\operations.py", line 374, in <listcomp>
+    multi_ORDER_MANAGER = [regions[iii]["reg_resp_name"] for iii in [i.text.strip() for i in soup.find_all("region_code")]] # DONE
+                           ~~~~~~~^^^^^
+KeyError: ''
+
